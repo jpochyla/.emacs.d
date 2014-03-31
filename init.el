@@ -54,37 +54,46 @@
 ;; Enable column number in modeline
 (setq column-number-mode t)
 
-;; Enable indicator of the end of the buffer
-(setq indicate-empty-lines t)
-
 ;; Enable y/n answers
 (fset 'yes-or-no-p 'y-or-n-p)
+
+;; Match parentheses without delay
+(setq show-paren-delay 0)
 
 ;; GUI
 (when window-system
 
   ;; Window size and position
   (add-to-list 'default-frame-alist (cons 'left 400))
-  (add-to-list 'default-frame-alist (cons 'width 100))
-  (add-to-list 'default-frame-alist (cons 'height 56))
+  (add-to-list 'default-frame-alist (cons 'width 90))
+  (add-to-list 'default-frame-alist (cons 'height 50))
 
   ;; No window border
   (add-to-list 'default-frame-alist '(internal-border-width . 0))
 
+  ;; Line spacing
+  ;; (add-to-list 'default-frame-alist '(line-spacing . 1))
+
+  ;; Indicate the end of buffer
+  (setq indicate-empty-lines t)
+
   ;; Font
-  (set-face-font 'default "Monaco-12")
-  (set-face-font 'fixed-pitch "Monaco-12")
-  (set-face-font 'variable-pitch "Lucida Grande-12")
+  (set-face-font 'default "Meslo LG S-13")
+  (set-face-font 'fixed-pitch "Meslo LG S-13")
+  (set-face-font 'variable-pitch "Lucida Grande-13")
 
-  ;; Use line cursor
+  ;; Use line cursor, don't blink
   (setq-default cursor-type 'bar)
-
-  ;; Enable menu bar
-  (menu-bar-mode t)
+  (blink-cursor-mode 0)
 
   ;; Color theme
-  ;; (load-theme 'noctilux)
-  (load-theme 'sanityinc-solarized-light))
+  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
+  (load-theme 'noctilux)
+  ;; (load-theme 'sanityinc-solarized-light)
+  ;; (load-theme 'default-dark)
+
+  ;; Enable menu bar
+  (menu-bar-mode t))
 
 ;; Granular trackpad scrolling
 (global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
@@ -95,12 +104,19 @@
 (global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))
 
 ;; IDO
+(add-to-list 'ido-ignore-files "\\.DS_Store")
 (require 'ido-ubiquitous)
-(require 'ido-vertical-mode)
-(require 'flx-ido)
 (ido-ubiquitous-mode t)
-(ido-vertical-mode t)
+(require 'flx-ido)
 (flx-ido-mode t)
+;; (require 'ido-vertical-mode)
+;; (ido-vertical-mode t)
+(setq ido-enable-prefix nil
+      ido-use-virtual-buffers t
+      ido-create-new-buffer 'always
+      ido-use-filename-at-point 'guess
+      ido-default-file-method 'selected-window
+      ido-auto-merge-work-directories-length -1)
 
 ;;
 ;; Editing & Development
@@ -125,7 +141,8 @@
 (require 'smartparens-config)
 (setq sp-base-key-bindings 'paredit
       sp-autoskip-closing-pair 'always
-      sp-autoescape-string-quote nil)
+      sp-autoescape-string-quote nil
+      sp-show-pair-delay 0)
 (sp-use-paredit-bindings)
 
 ;; Auto-complete
@@ -137,28 +154,53 @@
 
 (defun join-line-down ()
   (interactive)
-  (join-line -1))
+  (join-line t))
 (global-set-key (kbd "M-j") 'join-line-down)
 
 ;; Expand region by semantic units
 (require 'expand-region)
 (global-set-key (kbd "C-=") 'er/expand-region)
 
+;; Multiple cursors
+(require 'multiple-cursors)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C->") 'mc/mark-all-like-this)
+
 ;; Moving line/region up/down
 (require 'move-text)
 (global-set-key (kbd "C-S-p") 'move-text-up)
 (global-set-key (kbd "C-S-n") 'move-text-down)
+
+;; Quick movement
+(global-set-key (kbd "M-n") 'forward-paragraph)
+(global-set-key (kbd "M-p") 'backward-paragraph)
+
+;; Smex
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
 ;; Global dev hooks
 
 (defun auto-fill-comments ()
   (set (make-local-variable 'comment-auto-fill-only-comments) t))
 
+(defun delete-trailing-whitespace-on-save ()
+  (add-to-list 'write-file-functions 'delete-trailing-whitespace))
+
 (defun prog-mode-defaults ()
-  (smartparens-strict-mode t)
+  (subword-mode t)
+  (smartparens-mode t)
   (auto-complete-mode t)
-  (auto-fill-comments))
+  (auto-fill-comments)
+  (delete-trailing-whitespace-on-save))
 (add-hook 'prog-mode-hook 'prog-mode-defaults)
+
+(defun lisp-mode-defaults ()
+  (smartparens-strict-mode t)
+  (rainbow-delimiters-mode t))
+(add-hook 'emacs-lisp-mode-hook 'lisp-mode-defaults)
+(add-hook 'clojure-mode-hook 'lisp-mode-defaults)
 
 (defun text-mode-defaults ()
   (smartparens-strict-mode t)
@@ -174,6 +216,14 @@
       web-mode-css-indent-offset 4
       web-mode-code-indent-offset 4)
 
+;; Javascript
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(custom-set-variables
+ '(js2-basic-offset 2))
+
 ;; Clojure
 
+(add-hook 'cider-repl-mode-hook 'lisp-mode-defaults)
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 (setq nrepl-hide-special-buffers t)
