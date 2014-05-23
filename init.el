@@ -23,7 +23,7 @@
 (setq default-directory "~")
 
 ;; Store saved customizations in a separate file
-(setq custom-file (concat user-emacs-directory "custom.el"))
+(setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
 ;; Character encodings default to utf-8
@@ -35,6 +35,18 @@
 
 ;; Move deleted files to trash
 (setq delete-by-moving-to-trash t)
+
+;; Store temp files in proper location
+(setq undo-tree-history-directory-alist
+      `((".*" . "~/.emacs.d/var/undo")))
+(setq backup-directory-alist
+      `((".*" . "~/.emacs.d/var/backup")))
+(setq auto-save-file-name-transforms
+      `((".*" "~/.emacs.d/var/autosave" t)))
+(setq auto-save-list-file-prefix "~/emacs.d/var")
+(setq ac-comphist-file "~/.emacs.d/var/ac-comphist.dat")
+(setq save-place-file "~/.emacs.d/var/places")
+(setq mc/list-file "~/.emacs.d/var/mc-lists.el")
 
 ;; Auto refresh buffers
 (global-auto-revert-mode t)
