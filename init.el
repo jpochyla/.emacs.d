@@ -162,6 +162,13 @@
 (require 'auto-complete-config)
 (setq ac-ignore-case nil)
 
+;; Indent after yank
+(dolist (command '(yank yank-pop))
+  (eval `(defadvice ,command (after indent-region activate)
+           (when (not current-prefix-arg)
+             (let ((mark-even-if-inactive transient-mark-mode))
+               (indent-region (region-beginning) (region-end) nil))))))
+
 ;; Bindings
 
 (defun join-line-down ()
