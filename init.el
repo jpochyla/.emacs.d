@@ -228,9 +228,19 @@
          '(:add (pair-on-newline-and-indent "RET")))
 
 ;; Auto-complete
-(require 'auto-complete)
-(require 'auto-complete-config)
-(setq ac-ignore-case nil)
+(require 'company)
+(setq company-idle-delay 0.125
+      company-tooltip-limit 12
+      company-minimum-prefix-length 1
+      company-tooltip-flip-when-above t
+      company-require-match nil
+      company-dabbrev-ignore-case nil
+      company-dabbrev-downcase nil
+      company-transformers '(company-sort-by-occurrence)
+      company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+                          company-preview-frontend
+                          company-echo-metadata-frontend))
+(define-key company-active-map (kbd "ESC") 'company-abort)
 
 ;; Indent after yank
 (dolist (command '(yank yank-pop))
@@ -281,8 +291,8 @@
 
 (defun prog-mode-defaults ()
   (subword-mode t)
+  (company-mode t)
   (smartparens-mode t)
-  (auto-complete-mode t)
   (auto-fill-comments)
   (delete-trailing-whitespace-on-save))
 (add-hook 'prog-mode-hook 'prog-mode-defaults)
