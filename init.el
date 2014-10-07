@@ -114,48 +114,10 @@
 ;; Match parentheses without delay
 (setq show-paren-delay 0)
 
-;; GUI
-(when window-system
-
-  ;; Window size and position
-  (add-to-list 'default-frame-alist (cons 'left 400))
-  (add-to-list 'default-frame-alist (cons 'width 90))
-  (add-to-list 'default-frame-alist (cons 'height 50))
-
-  ;; No window border
-  (add-to-list 'default-frame-alist '(internal-border-width . 0))
-
-  ;; Line spacing
-  ;; (add-to-list 'default-frame-alist '(line-spacing . 1))
-
-  ;; Indicate the end of buffer
-  (setq indicate-empty-lines t)
-
-  ;; Font
-  (set-face-font 'default "Meslo LG S-13")
-  (set-face-font 'fixed-pitch "Meslo LG S-13")
-  (set-face-font 'variable-pitch "Lucida Grande-13")
-
-  ;; Use line cursor, don't blink
-  (setq-default cursor-type 'bar)
-  (blink-cursor-mode 0)
-
-  ;; Color theme
-  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
-  (load-theme 'noctilux)
-  ;; (load-theme 'sanityinc-solarized-light)
-  ;; (load-theme 'default-dark)
-
-  ;; Enable menu bar
-  (menu-bar-mode t))
-
-;; Granular trackpad scrolling
-(global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
-(global-set-key [wheel-up] (lambda () (interactive) (scroll-down-command 1)))
-(global-set-key [double-wheel-down] (lambda () (interactive) (scroll-up-command 2)))
-(global-set-key [double-wheel-up] (lambda () (interactive) (scroll-down-command 2)))
-(global-set-key [triple-wheel-down] (lambda () (interactive) (scroll-up-command 4)))
-(global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))
+;; Show visual indicators of line wrap
+(setq-default fringe-mode 'left-only)
+(setq-default visual-line-fringe-indicators
+              '(left-curly-arrow right-curly-arrow))
 
 ;; IDO
 (add-to-list 'ido-ignore-files "\\.DS_Store")
@@ -163,14 +125,61 @@
 (ido-ubiquitous-mode t)
 (require 'flx-ido)
 (flx-ido-mode t)
-;; (require 'ido-vertical-mode)
-;; (ido-vertical-mode t)
 (setq ido-enable-prefix nil
       ido-use-virtual-buffers t
       ido-create-new-buffer 'always
       ido-use-filename-at-point 'guess
-      ido-default-file-method 'selected-window
-      ido-auto-merge-work-directories-length -1)
+      ido-default-file-method 'selected-window)
+;; Bind `~` to go to homedir when in ido-find-file
+(add-hook 'ido-setup-hook
+          (lambda ()
+            (define-key ido-file-completion-map
+              (kbd "~")
+              (lambda ()
+                (interactive)
+                (if (looking-back "/")
+                    (insert "~/")
+                  (call-interactively 'self-insert-command))))))
+
+;; GUI
+(when window-system
+
+  ;; Window size and position
+  (add-to-list 'default-frame-alist (cons 'left 350))
+  (add-to-list 'default-frame-alist (cons 'width 95))
+  (add-to-list 'default-frame-alist (cons 'height 50))
+
+  ;; No window border
+  (add-to-list 'default-frame-alist '(internal-border-width . 0))
+
+  ;; Indicate the end of buffer
+  (setq-default indicate-empty-lines t)
+
+  ;; Linum format to avoid graphics glitches in fringe
+  (setq-default linum-format " %4d ")
+
+  ;; Font
+  (set-face-font 'default "Input Mono Narrow-12")
+  (set-face-font 'fixed-pitch "Input Mono Narrow-12")
+  (set-face-font 'variable-pitch "Input Sans Narrow-12")
+
+  ;; Don't blink
+  (blink-cursor-mode 0)
+
+  ;; Color themes
+  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
+  ;; (load-theme 'default-black)
+
+  ;; Granular trackpad scrolling
+  (global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
+  (global-set-key [wheel-up] (lambda () (interactive) (scroll-down-command 1)))
+  (global-set-key [double-wheel-down] (lambda () (interactive) (scroll-up-command 2)))
+  (global-set-key [double-wheel-up] (lambda () (interactive) (scroll-down-command 2)))
+  (global-set-key [triple-wheel-down] (lambda () (interactive) (scroll-up-command 4)))
+  (global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))
+
+  ;; Enable menu bar
+  (menu-bar-mode t))
 
 ;;; Editing
 ;;; ====================================================================
