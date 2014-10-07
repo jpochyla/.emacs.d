@@ -242,12 +242,31 @@
                           company-echo-metadata-frontend))
 (define-key company-active-map (kbd "ESC") 'company-abort)
 
-;; Indent after yank
-(dolist (command '(yank yank-pop))
-  (eval `(defadvice ,command (after indent-region activate)
-           (when (not current-prefix-arg)
-             (let ((mark-even-if-inactive transient-mark-mode))
-               (indent-region (region-beginning) (region-end) nil))))))
+;; Snippets
+(require 'yasnippet)
+(setq yas-prompt-functions '(yas/ido-prompt yas/completing-prompt)
+      yas-verbosity 1
+      yas-wrap-around-region t)
+
+(defun yas/goto-end-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+         (position (yas--field-end (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-end-of-line 1)
+      (goto-char position))))
+
+(defun yas/goto-start-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+         (position (yas--field-start (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-beginning-of-line 1)
+      (goto-char position))))
+
+(define-key yas-keymap (kbd "C-e") 'yas/goto-end-of-active-field)
+(define-key yas-keymap (kbd "C-a") 'yas/goto-start-of-active-field)
+(define-key yas-keymap (kbd "C-g") 'yas/exit-all-snippets)
 
 ;;; Global bindings
 ;;; ====================================================================
