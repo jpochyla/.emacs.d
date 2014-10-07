@@ -301,9 +301,9 @@
 (global-set-key (kbd "C-c C->") 'mc/mark-all-like-this)
 
 ;; Moving line/region up/down
-(require 'move-text)
-(global-set-key (kbd "C-S-p") 'move-text-up)
-(global-set-key (kbd "C-S-n") 'move-text-down)
+(require 'shift-text)
+(global-set-key (kbd "C-S-p") 'shift-text-up)
+(global-set-key (kbd "C-S-n") 'shift-text-down)
 
 ;; Quick movement
 (global-set-key (kbd "M-n") 'forward-paragraph)
