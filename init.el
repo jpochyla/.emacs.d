@@ -1,8 +1,7 @@
-;; init.el
-;; Emacs configuration
+;;; init.el --- Emacs configuration
 
-;;
-;; Packages, global options
+;;; Packages, global options
+;;; ====================================================================
 
 (require 'package)
 
@@ -16,8 +15,8 @@
 ;; Load a slightly better set of defaults to build upon
 (require 'better-defaults)
 
-;;
-;; Environment
+;;; Environment
+;;; ====================================================================
 
 ;; Start in home directory
 (setq default-directory "~")
@@ -54,8 +53,8 @@
 ;; Run GC every 20 MB
 (setq gc-cons-threshold (* 20 1024 1024))
 
-;;
-;; UI
+;;; UI
+;;; ====================================================================
 
 ;; No startup splash screen
 (setq inhibit-startup-message t)
@@ -130,8 +129,8 @@
       ido-default-file-method 'selected-window
       ido-auto-merge-work-directories-length -1)
 
-;;
-;; Editing & Development
+;;; Editing
+;;; ====================================================================
 
 ;; Delete marked text on typing
 (delete-selection-mode t)
@@ -169,7 +168,8 @@
              (let ((mark-even-if-inactive transient-mark-mode))
                (indent-region (region-beginning) (region-end) nil))))))
 
-;; Bindings
+;;; Global bindings
+;;; ====================================================================
 
 (defun join-line-down ()
   (interactive)
@@ -199,7 +199,8 @@
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
-;; Global dev hooks
+;;; Development modes
+;;; ====================================================================
 
 (defun auto-fill-comments ()
   (set (make-local-variable 'comment-auto-fill-only-comments) t))
