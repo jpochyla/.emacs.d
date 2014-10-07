@@ -271,10 +271,24 @@
 ;;; Global bindings
 ;;; ====================================================================
 
+(defun kill-default-buffer ()
+  (interactive)
+  (let (kill-buffer-query-functions) (kill-buffer)))
+
+(defun kill-buffer-and-window ()
+  (interactive)
+  (progn
+    (kill-buffer)
+    (delete-window)))
+
 (defun join-line-down ()
   (interactive)
   (join-line t))
 (global-set-key (kbd "M-j") 'join-line-down)
+
+;; Buffer management
+(global-set-key (kbd "C-x k") 'kill-default-buffer)
+(global-set-key (kbd "C-x C-k") 'kill-buffer-and-window)
 
 ;; Expand region by semantic units
 (require 'expand-region)
