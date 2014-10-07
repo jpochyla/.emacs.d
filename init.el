@@ -331,16 +331,23 @@
   (delete-trailing-whitespace-on-save))
 (add-hook 'prog-mode-hook 'prog-mode-defaults)
 
+(defun text-mode-defaults ()
+  (auto-fill-mode t))
+(add-hook 'text-mode-hook 'text-mode-defaults)
+
+;; LISPs
+
 (defun lisp-mode-defaults ()
   (smartparens-strict-mode t)
   (rainbow-delimiters-mode t))
 (add-hook 'emacs-lisp-mode-hook 'lisp-mode-defaults)
 (add-hook 'clojure-mode-hook 'lisp-mode-defaults)
 
-(defun text-mode-defaults ()
-  (smartparens-strict-mode t)
-  (auto-fill-mode t))
-(add-hook 'text-mode-hook 'text-mode-defaults)
+;; Clojure
+
+(add-hook 'cider-repl-mode-hook 'lisp-mode-defaults)
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+(setq nrepl-hide-special-buffers t)
 
 ;; Web dev
 
