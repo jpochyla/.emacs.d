@@ -12,11 +12,51 @@
 ;; Initialize package system
 (package-initialize)
 
+;; Install all required packages
+(setq required-packages
+      '(better-defaults
+        cider
+        cmake-mode
+        company
+        company-tern
+        exec-path-from-shell
+        expand-region
+        flx
+        flx-ido
+        flycheck
+        go-mode
+        ido-ubiquitous
+        js2-mode
+        js2-refactor
+        magit
+        markdown-mode
+        math-symbols
+        multiple-cursors
+        protobuf-mode
+        rainbow-delimiters
+        rust-mode
+        shift-text
+        skewer-mode
+        smartparens
+        smex
+        undo-tree
+        web-mode
+        yasnippet))
+
+(defun package-require (pkg)
+  (when (not (package-installed-p pkg))
+    (package-install pkg)))
+(mapc 'package-require required-packages)
+
 ;; Load a slightly better set of defaults to build upon
 (require 'better-defaults)
 
 ;;; Environment
 ;;; ====================================================================
+
+;; Setup PATH
+(require 'exec-path-from-shell)
+(exec-path-from-shell-initialize)
 
 ;; Start in home directory
 (setq default-directory "~")
