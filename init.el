@@ -349,7 +349,24 @@
 (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 (setq nrepl-hide-special-buffers t)
 
-;; Web dev
+;; CMake
+
+(add-hook 'cmake-mode-hook 'prog-mode-defaults)
+
+;; C/C++
+
+(defun cc-mode-defaults ()
+  (semantic-mode t))
+(add-hook 'c-mode-common-hook 'cc-mode-defaults)
+
+(defconst cc-default-style
+  '("bsd"
+    (c-offsets-alist . ((innamespace . [0])))))
+(c-add-style "cc-default-style" cc-default-style)
+(setq c-default-style "cc-default-style"
+      c-basic-offset 4)
+
+;; Web
 
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
