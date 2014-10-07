@@ -195,9 +195,13 @@
 
 ;; Indentation
 (setq-default tab-width 4)
-(setq c-default-style "bsd"
-      c-basic-offset 4)
-(electric-indent-mode 1)
+
+;; Indent after yank
+(dolist (command '(yank yank-pop))
+  (eval `(defadvice ,command (after indent-region activate)
+           (when (not current-prefix-arg)
+             (let ((mark-even-if-inactive transient-mark-mode))
+               (indent-region (region-beginning) (region-end) nil))))))
 
 ;; Undo tree
 (global-undo-tree-mode t)
@@ -211,6 +215,17 @@
       sp-autoescape-string-quote nil
       sp-show-pair-delay 0)
 (sp-use-paredit-bindings)
+
+(defun pair-on-newline-and-indent (id action context)
+  (save-excursion
+    (newline)
+    (indent-according-to-mode))
+  (indent-according-to-mode))
+
+(sp-pair "{" nil :post-handlers
+         '(:add (pair-on-newline-and-indent "RET")))
+(sp-pair "[" nil :post-handlers
+         '(:add (pair-on-newline-and-indent "RET")))
 
 ;; Auto-complete
 (require 'auto-complete)
