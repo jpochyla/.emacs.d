@@ -378,11 +378,40 @@
 ;; Javascript
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-(custom-set-variables
- '(js2-basic-offset 2))
+(setq-default js2-indent-on-enter-key t
+              js2-bounce-indent-p nil
+              js2-mirror-mode nil      ; We let smartparens do the job
+              js2-cleanup-whitespace t
+              js2-basic-offset 4
+              js2-global-externs '("module" "require" "process"
+                                   "console" "define" "JSON" "Buffer"
+                                   "setTimeout" "clearTimeout"
+                                   "setInterval" "clearInterval"))
 
-;; Clojure
+(eval-after-load 'js2-mode
+  '(progn
+     (define-key js2-mode-map (kbd "M-j") nil)))
 
-(add-hook 'cider-repl-mode-hook 'lisp-mode-defaults)
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-(setq nrepl-hide-special-buffers t)
+;; Pretty symbols
+(add-hook 'js2-mode-hook
+          (lambda ()
+            (add-to-list 'prettify-symbols-alist '("function" . ?λ))
+            (prettify-symbols-mode t)))
+
+;; Refactoring
+(require 'js2-refactor)
+(js2r-add-keybindings-with-prefix "C-c C-m")
+
+;; Tern.js
+(add-to-list 'load-path "~/.emacs.d/vendor/tern/emacs")
+(autoload 'tern-mode "tern.el" nil t)
+(add-hook 'js2-mode-hook
+          (lambda ()
+            (tern-mode t)
+            (add-to-list 'company-backends 'company-tern)))
+
+;; Skewer
+;; (require 'skewer-mode)
+;; (add-hook 'js2-mode-hook 'skewer-mode)
+;; (add-hook 'css-mode-hook 'skewer-css-mode)
+;; (add-hook 'html-mode-hook 'skewer-html-mode)
