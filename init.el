@@ -75,17 +75,20 @@
 ;; Move deleted files to trash
 (setq delete-by-moving-to-trash t)
 
+;; Don't create lock files for opened buffers
+(setq create-lockfiles nil)
+
 ;; Store temp files in proper location
-(setq undo-tree-history-directory-alist
-      `((".*" . "~/.emacs.d/var/undo")))
-(setq backup-directory-alist
-      `((".*" . "~/.emacs.d/var/backup")))
-(setq auto-save-file-name-transforms
-      `((".*" "~/.emacs.d/var/autosave" t)))
-(setq auto-save-list-file-prefix "~/emacs.d/var")
-(setq ac-comphist-file "~/.emacs.d/var/ac-comphist.dat")
-(setq save-place-file "~/.emacs.d/var/places")
-(setq mc/list-file "~/.emacs.d/var/mc-lists.el")
+(setq var-dir "~/.emacs.d/var")
+(setq backup-directory-alist `((".*" . ,(expand-file-name "backup" var-dir)))
+      undo-tree-history-directory-alist `((".*" . ,(expand-file-name "undo" var-dir)))
+      auto-save-file-name-transforms `((".*" ,(expand-file-name "autosave" var-dir) t))
+      auto-save-list-file-prefix (expand-file-name "autosave-" var-dir)
+      ido-save-directory-list-file (expand-file-name "ido.last" var-dir)
+      recentf-save-file (expand-file-name "recentf" var-dir)
+      save-place-file (expand-file-name "places" var-dir)
+      smex-save-file (expand-file-name "smex-items" var-dir)
+      mc/list-file (expand-file-name "mc-lists.el" var-dir))
 
 ;; Auto refresh buffers
 (global-auto-revert-mode t)
