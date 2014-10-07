@@ -199,6 +199,10 @@
       c-basic-offset 4)
 (electric-indent-mode 1)
 
+;; Undo tree
+(global-undo-tree-mode t)
+(setq undo-tree-auto-save-history t)
+
 ;; Auto-pairing and structured editing
 (require 'smartparens)
 (require 'smartparens-config)
