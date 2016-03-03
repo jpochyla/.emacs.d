@@ -28,15 +28,17 @@
     volatile-highlights
 
     anzu
+    counsel
     diminish
+    flx
     git-timemachine
-    helm
-    helm-projectile
+    git-gutter
     magit
     projectile
-    smart-mode-line
+    swiper
 
     cmake-mode
+    dockerfile-mode
     go-mode
     markdown-mode
     protobuf-mode
@@ -63,7 +65,7 @@
       auto-save-list-file-prefix (expand-file-name "autosave-" var-dir))
 
 (require 'saveplace)
-(setq save-place t)
+(setq-default save-place t)
 (setq save-place-file (expand-file-name "places" var-dir))
 
 (require 'recentf)
@@ -94,11 +96,13 @@
 
 ;; auto refresh buffers
 (global-auto-revert-mode t)
+(diminish 'auto-revert-mode)
 
 ;; run GC every 20 MB
 (setq gc-cons-threshold (* 20 1024 1024))
 
 ;; support sudo+ssh in tramp-mode
+(setq tramp-default-method "ssh")
 (set-default 'tramp-default-proxies-alist
              (quote ((".*" "\\`root\\'" "/ssh:%h:"))))
 
@@ -131,6 +135,10 @@
 (require 'anzu)
 (global-anzu-mode)
 (diminish 'anzu-mode)
+
+;; show git info in the gutter
+(require 'git-gutter)
+(diminish 'git-gutter-mode)
 
 ;; make buffer names unique
 (require 'uniquify)
@@ -170,12 +178,15 @@
   (add-to-list 'default-frame-alist '(internal-border-width . 0))
 
   ;; font
-  (set-face-font 'default "Input Mono Narrow-12")
-  (set-face-font 'fixed-pitch "Input Mono Narrow-12")
+  ;; (set-face-font 'default "Input Mono Narrow-12")
+  ;; (set-face-font 'fixed-pitch "Input Mono Narrow-12")
+  ;; (set-face-font 'variable-pitch "Input Sans Narrow-12")
+  (set-face-font 'default "Roboto Mono-12")
+  (set-face-font 'fixed-pitch "Roboto Mono-12")
   (set-face-font 'variable-pitch "Input Sans Narrow-12")
 
   ;; wider fringe
-  (set-fringe-mode '(8 . 0))
+  (fringe-mode '(nil . 0))
 
   ;; don't blink
   (blink-cursor-mode 0)
@@ -219,131 +230,132 @@
    ((t (:background unspecified
                     :foreground unspecified
                     :inherit font-lock-preprocessor-face))))
- `(web-mode-symbol-face
-   ((t (:foreground unspecified
-                    :inherit font-lock-constant-face))))
- `(web-mode-builtin-face
+ `(web-mode-function-call-face
    ((t (:foreground unspecified
                     :inherit default))))
- `(web-mode-doctype-face
-   ((t (:foreground unspecified
-                    :inherit font-lock-comment-face))))
- `(web-mode-html-tag-face
-   ((t (:foreground unspecified
-                    :inherit font-lock-function-name-face))))
- `(web-mode-html-attr-name-face
-   ((t (:foreground unspecified
-                    :inherit font-lock-variable-name-face))))
- `(web-mode-html-param-name-face
-   ((t (:foreground unspecified
-                    :inherit font-lock-constant-face))))
- `(web-mode-whitespace-face
-   ((t (:foreground unspecified
-                    :inherit whitespace-space))))
- `(web-mode-block-face
-   ((t (:foreground unspecified
-                    :inherit highlight))))
- `(sp-show-pair-match-face
-   ((t (:foreground unspecified
-                    :background unspecified
-                    :inherit show-paren-match))))
- `(sp-show-pair-mismatch-face
-   ((t (:foreground unspecified
-                    :background unspecified
-                    :inherit show-paren-mismatch)))))
+ ;; `(web-mode-symbol-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit font-lock-constant-face))))
+ ;; `(web-mode-builtin-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit default))))
+ ;; `(web-mode-doctype-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit font-lock-comment-face))))
+ ;; `(web-mode-html-tag-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit font-lock-function-name-face))))
+ ;; `(web-mode-html-attr-name-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit font-lock-variable-name-face))))
+ ;; `(web-mode-html-param-name-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit font-lock-constant-face))))
+ ;; `(web-mode-whitespace-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit whitespace-space))))
+ ;; `(web-mode-block-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :inherit highlight))))
+ ;; `(sp-show-pair-match-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :background unspecified
+ ;;                    :inherit show-paren-match))))
+ ;; `(sp-show-pair-mismatch-face
+ ;;   ((t (:foreground unspecified
+ ;;                    :background unspecified
+ ;;                    :inherit show-paren-mismatch))))
+ )
 
-;; smart-mode-line
+;; ivy-mode
 
-(require 'smart-mode-line)
-(sml/setup)
-;; (setq-default sml/theme nil)
-;; (sml/apply-theme 'dark)
+(require 'ivy)
 
-;; helm-mode
+(ivy-mode t)
+(diminish 'ivy-mode)
 
-(require 'helm)
-(require 'helm-config)
+(setq ivy-use-virtual-buffers t)
+(setq ivy-extra-directories nil)
+(setq ivy-initial-inputs-alist nil)
+(setq ivy-re-builders-alist
+      '((t . ivy--regex-fuzzy)))
 
-(helm-mode t)
-(helm-autoresize-mode t)
-(diminish 'helm-mode)
+(defun eh-ivy-open-current-typed-path ()
+  "Do not open dired on directories."
+  (interactive)
+  (when ivy--directory
+    (let* ((dir ivy--directory)
+           (text-typed ivy-text)
+           (path (concat dir text-typed)))
+      (delete-minibuffer-contents)
+      (ivy--done path))))
 
-(global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
-(global-set-key (kbd "C-x b") 'helm-mini)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
+(define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done)
+(define-key ivy-minibuffer-map (kbd "C-f") 'eh-ivy-open-current-typed-path)
 
-(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
-(define-key helm-map (kbd "C-z")  'helm-select-action)
+(defun eh-ivy-return-recentf-index (dir)
+  (when (and (boundp 'recentf-list)
+             recentf-list)
+    (let ((files-list
+           (cl-subseq recentf-list
+                      0 (min (- (length recentf-list) 1) 20)))
+          (index 0))
+      (while files-list
+        (if (string-match-p dir (car files-list))
+            (setq files-list nil)
+          (setq index (+ index 1))
+          (setq files-list (cdr files-list))))
+      index)))
 
-;; helm fuzzy match
-(setq-default helm-M-x-fuzzy-match t
-              helm-buffers-fuzzy-matching t
-              helm-recentf-fuzzy-match t)
+(defun eh-ivy-sort-file-function (x y)
+  "Sort files and directories by `recentf' information."
+  (let* ((x (concat ivy--directory x))
+         (y (concat ivy--directory y))
+         (x-mtime (nth 5 (file-attributes x)))
+         (y-mtime (nth 5 (file-attributes y))))
+    (if (file-directory-p x)
+        (if (file-directory-p y)
+            (let ((x-recentf-index (eh-ivy-return-recentf-index x))
+                  (y-recentf-index (eh-ivy-return-recentf-index y)))
+              (if (and x-recentf-index y-recentf-index)
+                  ;; Directories is sorted by `recentf-list' index
+                  (< x-recentf-index y-recentf-index)
+                (string< x y)))
+          t)
+      (if (file-directory-p y)
+          nil
+        ;; Files is sorted by mtime
+        (time-less-p y-mtime x-mtime)))))
 
-;; helm-find-files
-(setq-default helm-ff-search-library-in-sexp t
-              helm-ff-file-name-history-use-recentf t
-              helm-ff-skip-boring-files t
-              helm-boring-file-regexp-list '("\\.git$" "\\.DS_Store$"))
-(advice-add 'helm-ff-filter-candidate-one-by-one
-            :around (lambda (fcn file)
-                      (unless (string-match "\\(?:/\\|\\`\\)\\.\\{1,2\\}\\'" file)
-                        (funcall fcn file))))
+(add-to-list 'ivy-sort-functions-alist
+             '(read-file-name-internal . eh-ivy-sort-file-function))
 
-;; helm-mode ui
-(setq helm-split-window-in-side-p t
-      helm-move-to-line-cycle-in-source t
-      helm-scroll-amount 8
-      helm-display-header-line nil
-      helm-autoresize-min-height 20
-      helm-autoresize-max-height 30)
+(defun counsel-ag-symbol ()
+  (interactive)
+  (counsel-ag (thing-at-point 'symbol)))
 
-;; helm header line
-(defvar helm-source-header-default-background (face-attribute 'helm-source-header :background))
-(defvar helm-source-header-default-foreground (face-attribute 'helm-source-header :foreground))
-(defvar helm-source-header-default-box (face-attribute 'helm-source-header :box))
-(defun helm-toggle-header-line ()
-  "Show `helm-mode' header line only for multiple sources."
-  (if (> (length helm-sources) 1)
-      (set-face-attribute 'helm-source-header
-                          nil
-                          :foreground helm-source-header-default-foreground
-                          :background helm-source-header-default-background
-                          :box helm-source-header-default-box
-                          :height 1.0)
-    (set-face-attribute 'helm-source-header
-                        nil
-                        :foreground (face-attribute 'helm-selection :background)
-                        :background (face-attribute 'helm-selection :background)
-                        :box nil
-                        :height 0.1)))
-(add-hook 'helm-before-initialize-hook 'helm-toggle-header-line)
+(defun counsel-ag-project ()
+  (interactive)
+  (counsel-ag nil (projectile-project-root)))
+
+(defun counsel-ag-project-symbol ()
+  (interactive)
+  (counsel-ag (thing-at-point 'symbol) (projectile-project-root)))
+
+(global-set-key (kbd "C-c k") 'counsel-ag-project)
+(global-set-key (kbd "C-c l") 'counsel-ag-project-symbol)
 
 ;; projectile
 
 (require 'projectile)
 (projectile-global-mode)
+(setq projectile-completion-system 'ivy)
 (setq-default projectile-known-projects-file
               (expand-file-name "projectile-bookmarks.eld" var-dir))
 
-(require 'helm-projectile)
-(helm-projectile-on)
+;; magit
 
-;; term-mode
-
-(defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
-  "Kill empty buffer after the shell exits."
-  (if (memq (process-status proc) '(signal exit))
-      (let ((buffer (process-buffer proc)))
-        ad-do-it
-        (kill-buffer buffer))
-    ad-do-it))
-(ad-activate 'term-sentinel)
-
-(defvar ansi-term-color-vector
-  [default default default default default default default default default])
+(global-set-key (kbd "C-x g") 'magit-status)
 
 ;;; editing
 ;;; ====================================================================
@@ -358,12 +370,8 @@
 ;; replace marked text on typing
 (delete-selection-mode t)
 
-;; soft-wrap lines
-(global-visual-line-mode t)
-(diminish 'visual-line-mode)
-
 ;; wrap at 80 characters
-(setq fill-column 80)
+(setq-default fill-column 80)
 
 ;; fix empty pasteboard error
 (setq save-interprogram-paste-before-kill nil)
@@ -390,12 +398,33 @@
   (interactive
    (list (not (region-active-p)))))
 
-;; indent yanked text
-(dolist (command '(yank yank-pop))
-  (eval `(defadvice ,command (after indent-region activate)
-           (when (not current-prefix-arg)
-             (let ((mark-even-if-inactive transient-mark-mode))
-               (indent-region (region-beginning) (region-end) nil))))))
+;; beginning of line
+
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
 
 ;; smartparens
 
@@ -437,6 +466,8 @@
       company-minimum-prefix-length 1
       company-tooltip-flip-when-above t
       company-require-match nil
+      company-dabbrev-ignore-case nil
+      company-dabbrev-downcase nil
       company-transformers '(company-sort-by-occurrence)
       company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
                           company-preview-frontend
@@ -493,7 +524,7 @@
 (defun prelude-font-lock-comment-annotations ()
   "Highlight a bunch of well known comment annotations."
   (font-lock-add-keywords
-   nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
+   nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):?\\)"
           1 font-lock-warning-face t))))
 
 (defun auto-fill-comments ()
@@ -506,11 +537,13 @@
 
 (defun prog-mode-defaults ()
   "`prog-mode' settings."
+  (setq truncate-lines t)
   (subword-mode t)
   (company-mode t)
-  (flycheck-mode t)
-  (smartparens-mode t)
+  (electric-pair-mode t)
+  ;; (smartparens-mode t)
   (auto-fill-comments)
+  (git-gutter-mode)
   (delete-trailing-whitespace-on-save)
   (prelude-font-lock-comment-annotations))
 (add-hook 'prog-mode-hook 'prog-mode-defaults)
@@ -552,19 +585,22 @@
 
 (defun go-mode-defaults ()
   "`go-mode' settings."
+  (flycheck-mode t)
   (setq tab-width 8))
 (add-hook 'go-mode-hook 'go-mode-defaults)
 
 ;; web-mode
 
-(require 'web-mode)
-(add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 (setq web-mode-markup-indent-offset 2
       web-mode-css-indent-offset 4
-      web-mode-code-indent-offset 4)
+      web-mode-code-indent-offset 4
+      web-mode-extra-keywords '(("javascript" . ("declare" "module" "type" "continue"
+                                                 "async" "await"))))
+(require 'web-mode)
 
-;; js-mode
+(add-to-list 'web-mode-comment-formats '("javascript" . "// "))
 
 (defun js-doc-comment ()
   "Insert a js-doc comment at point."
@@ -578,16 +614,6 @@
   (previous-line)
   (end-of-line)
   (insert " "))
-
-(defun js-mode-defaults ()
-  "`js-mode' settings."
-  (setq mode-name "JS")
-  (aggressive-indent-mode t)
-  (add-to-list 'company-backends 'company-tern))
-
-(add-hook 'js-mode-hook 'js-mode-defaults)
-
-;; js-mode flow
 
 (defun buffer-first-line ()
   "Return the first line of current buffer."
@@ -608,15 +634,10 @@
           ": "
           (message (minimal-match (and (one-or-more anything) "\n")))
           line-end))
-  :modes js-mode
+  :modes web-mode
   :predicate
   (lambda () (string-match ".*@flow.*" (buffer-first-line))))
 
 (add-to-list 'flycheck-checkers 'javascript-flow)
-
-;; disable jshint, we use eslint instead
-(setq-default flycheck-disabled-checkers
-              (append flycheck-disabled-checkers
-                      '(javascript-jshint)))
 
 ;;; init.el ends here
